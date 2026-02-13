@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محاسبه‌گر جادویی خواب | نسخه سه‌بعدی</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;400;700&display=swap');
+        
+        :root {
+            --primary: #8b5cf6;
+            --secondary: #ec4899;
+            --bg: #0f172a;
+        }
+
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
+            color: #f8fafc;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .glass-3d {
+            background: rgba(255, 255, 255, 0.07);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 30px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3), 
+                        inset 0 0 20px rgba(255, 255, 255, 0.05);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .glass-3d:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 30px 60px rgba(139, 92, 246, 0.2);
+            border: 1px solid rgba(139, 92, 246, 0.4);
+        }
+
+        .stat-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.02));
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .neon-glow {
+            filter: drop-shadow(0 0 8px var(--primary));
+        }
+
+        .floating {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(2deg); }
+        }
+
+        .gradient-text {
+            background: linear-gradient(to right, #c084fc, #f472b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        input[type="range"] {
+            height: 10px;
+            border-radius: 5px;
+            background: #1e293b;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #8b5cf6;
+            cursor: pointer;
+            box-shadow: 0 0 15px #8b5cf6;
+            border: 3px solid white;
+        }
+
+        .custom-loader {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #8b5cf6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="p-4 md:p-10">
+
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <header class="text-center mb-16 relative">
+            <div class="absolute -top-10 left-1/2 -translate-x-1/2 w-64 h-64 bg-violet-600/20 blur-[100px] -z-10"></div>
+            <h1 class="text-5xl md:text-7xl font-bold mb-6 floating">
+                <span class="gradient-text">رویای سه‌بعدی تو</span>
+                <i class="fas fa-stars text-yellow-400 text-3xl align-top mr-2"></i>
+            </h1>
+            <p class="text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed">
+                تا به حال فکر کردی چند سال از عمرت رو در حال پرواز تو آسمانِ خیال بودی؟ 
+                بیا با هم این سفر رو تحلیل کنیم!
+            </p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+            
+            <!-- Sidebar Controls -->
+            <div class="lg:col-span-4 space-y-8">
+                <div class="glass-3d p-8">
+                    <h2 class="text-2xl font-bold mb-8 flex items-center">
+                        <i class="fas fa-user-astronaut ml-3 text-violet-400"></i>
+                        اطلاعات شخصی
+                    </h2>
+                    
+                    <div class="space-y-8">
+                        <div>
+                            <label class="block text-sm font-medium mb-3 text-slate-400">سن شما چقدر است؟</label>
+                            <div class="relative">
+                                <input type="number" id="ageInput" value="25" 
+                                    class="w-full bg-slate-800/50 border border-slate-700 rounded-2xl p-4 text-2xl font-bold focus:ring-4 focus:ring-violet-500/20 transition-all outline-none">
+                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold">سال</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between mb-3">
+                                <label class="text-sm font-medium text-slate-400">میزان خواب شبانه</label>
+                                <span class="bg-violet-500/20 text-violet-300 px-3 py-1 rounded-full text-sm font-bold">
+                                    <span id="hoursVal">8</span> ساعت
+                                </span>
+                            </div>
+                            <input type="range" id="hoursInput" min="1" max="24" value="8" class="w-full">
+                        </div>
+
+                        <button onclick="calculate()" class="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold py-5 rounded-2xl shadow-2xl shadow-violet-900/40 transition-all transform active:scale-95 flex items-center justify-center text-lg">
+                            <i class="fas fa-wand-magic-sparkles ml-2"></i>
+                            محاسبه جادویی
+                        </button>
+                    </div>
+                </div>
+
+                <!-- AI Dream Canvas -->
+                <div class="glass-3d p-8 overflow-hidden relative">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-pink-500/10 blur-3xl"></div>
+                    <h2 class="text-xl font-bold mb-4 text-pink-300">
+                        <i class="fas fa-paint-brush ml-2"></i>نقاشی رویا با هوش مصنوعی
+                    </h2>
+                    <p class="text-xs text-slate-400 mb-6">خواب دیشب یادت هست؟ برام بنویس تا تصویرش رو بسازم.</p>
+                    <textarea id="dreamPrompt" placeholder="مثلاً: نهنگی که در کهکشان صورتی شنا می‌کند..." 
+                        class="w-full bg-slate-800/40 border border-slate-700 rounded-xl p-3 text-sm focus:ring-2 focus:ring-pink-500 outline-none mb-4 min-h-[100px]"></textarea>
+                    
+                    <button onclick="generateDreamImage()" id="genBtn" class="w-full bg-slate-700 hover:bg-pink-600 py-3 rounded-xl transition-all font-bold">
+                        <i class="fas fa-sparkles ml-2"></i>ساخت تصویر
+                    </button>
+
+                    <div id="loadingIndicator" class="mt-4 flex flex-col items-center hidden">
+                        <div class="custom-loader block"></div>
+                        <p class="text-xs mt-2 text-pink-300">در حال بافتن رویا...</p>
+                    </div>
+
+                    <div id="dreamResult" class="mt-6 rounded-2xl overflow-hidden border-2 border-pink-500/30 shadow-2xl hidden">
+                        <img id="generatedImg" src="" alt="Dream" class="w-full h-auto">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Results Area -->
+            <div class="lg:col-span-8 space-y-10">
+                
+                <!-- Counter Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="glass-3d p-8 text-center group">
+                        <div class="w-16 h-16 bg-violet-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-violet-500/40 transition-colors">
+                            <i class="fas fa-calendar-check text-2xl text-violet-400"></i>
+                        </div>
+                        <p class="text-slate-400 text-sm mb-2">سال‌های در خواب</p>
+                        <h3 id="resYears" class="text-5xl font-bold gradient-text">0</h3>
+                    </div>
+                    
+                    <div class="glass-3d p-8 text-center group">
+                        <div class="w-16 h-16 bg-blue-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-500/40 transition-colors">
+                            <i class="fas fa-clock text-2xl text-blue-400"></i>
+                        </div>
+                        <p class="text-slate-400 text-sm mb-2">مجموع روزها</p>
+                        <h3 id="resDays" class="text-5xl font-bold text-blue-400">0</h3>
+                    </div>
+
+                    <div class="glass-3d p-8 text-center group">
+                        <div class="w-16 h-16 bg-emerald-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-emerald-500/40 transition-colors">
+                            <i class="fas fa-hourglass-half text-2xl text-emerald-400"></i>
+                        </div>
+                        <p class="text-slate-400 text-sm mb-2">ساعت‌های سپری شده</p>
+                        <h3 id="resHours" class="text-5xl font-bold text-emerald-400">0</h3>
+                    </div>
+                </div>
+
+                <!-- Animal Kingdom 3D Cards -->
+                <div class="glass-3d p-10 relative overflow-hidden">
+                    <div class="absolute top-0 left-0 p-4 opacity-10">
+                        <i class="fas fa-paw text-9xl"></i>
+                    </div>
+                    <h2 class="text-3xl font-bold mb-10 text-center">اگر حیوان بودی، عمرت چطور می‌گذشت؟</h2>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+                        <div class="stat-card p-6 text-center group cursor-help">
+                            <div class="text-6xl mb-4 transform group-hover:scale-125 transition-transform duration-500">🐨</div>
+                            <p class="font-bold text-lg mb-1">کوالا</p>
+                            <p class="text-violet-400 font-bold" id="koalaSleep">--</p>
+                            <div class="mt-3 text-[10px] bg-white/5 py-1 rounded-full">۲۲ ساعت در روز</div>
+                        </div>
+                        <div class="stat-card p-6 text-center group cursor-help">
+                            <div class="text-6xl mb-4 transform group-hover:scale-125 transition-transform duration-500">🦇</div>
+                            <p class="font-bold text-lg mb-1">خفاش</p>
+                            <p class="text-violet-400 font-bold" id="batSleep">--</p>
+                            <div class="mt-3 text-[10px] bg-white/5 py-1 rounded-full">۲۰ ساعت در روز</div>
+                        </div>
+                        <div class="stat-card p-6 text-center group cursor-help">
+                            <div class="text-6xl mb-4 transform group-hover:scale-125 transition-transform duration-500">🦁</div>
+                            <p class="font-bold text-lg mb-1">شیر</p>
+                            <p class="text-violet-400 font-bold" id="lionSleep">--</p>
+                            <div class="mt-3 text-[10px] bg-white/5 py-1 rounded-full">۱۳ ساعت در روز</div>
+                        </div>
+                        <div class="stat-card p-6 text-center group cursor-help">
+                            <div class="text-6xl mb-4 transform group-hover:scale-125 transition-transform duration-500">🦒</div>
+                            <p class="font-bold text-lg mb-1">زرافه</p>
+                            <p class="text-violet-400 font-bold" id="giraffeSleep">--</p>
+                            <div class="mt-3 text-[10px] bg-white/5 py-1 rounded-full">۲ ساعت در روز</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Health Doctor Section -->
+                <div id="healthPanel" class="glass-3d p-10 border-r-8 border-violet-500/50">
+                    <div class="flex items-start gap-6">
+                        <div class="hidden md:block text-5xl text-violet-400 mt-2">
+                            <i class="fas fa-briefcase-medical"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h2 class="text-2xl font-bold mb-4">نسخه اختصاصی برای شما</h2>
+                            <div id="healthAnalysis" class="space-y-4">
+                                <p class="text-slate-500 animate-pulse">در حال تحلیل داده‌های بیولوژیک شما...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <footer class="mt-20 py-10 border-t border-white/5 text-center text-slate-500">
+        <div class="flex justify-center gap-6 mb-4 text-xl">
+            <i class="fab fa-instagram hover:text-pink-500 transition-colors cursor-pointer"></i>
+            <i class="fab fa-twitter hover:text-blue-400 transition-colors cursor-pointer"></i>
+            <i class="fas fa-envelope hover:text-violet-400 transition-colors cursor-pointer"></i>
+        </div>
+        <p>&copy; 2026 ماشین حساب جادویی خواب | طراحی با عشق و هوش مصنوعی</p>
+    </footer>
+
+    <script>
+        const apiKey = ""; 
+
+        // Update Range
+        document.getElementById('hoursInput').addEventListener('input', (e) => {
+            document.getElementById('hoursVal').innerText = e.target.value;
+        });
+
+        async function calculate() {
+            const age = parseFloat(document.getElementById('ageInput').value);
+            const hours = parseFloat(document.getElementById('hoursInput').value);
+            
+            if (isNaN(age) || age <= 0) return;
+
+            const totalSleepYears = (age * hours) / 24;
+            const totalDays = totalSleepYears * 365;
+            const totalHours = totalDays * 24;
+
+            // Animate counts
+            animateValue("resYears", 0, totalSleepYears.toFixed(1), 1500);
+            animateValue("resDays", 0, Math.floor(totalDays), 1500);
+            animateValue("resHours", 0, Math.floor(totalHours), 1500);
+
+            // Animal Update
+            document.getElementById('koalaSleep').innerText = ((age * 22) / 24).toFixed(1) + " سال";
+            document.getElementById('batSleep').innerText = ((age * 20) / 24).toFixed(1) + " سال";
+            document.getElementById('lionSleep').innerText = ((age * 13) / 24).toFixed(1) + " سال";
+            document.getElementById('giraffeSleep').innerText = ((age * 1.9) / 24).toFixed(1) + " سال";
+
+            updateHealthTips(hours);
+        }
+
+        function animateValue(id, start, end, duration) {
+            const obj = document.getElementById(id);
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                const current = (progress * (end - start) + start);
+                obj.innerHTML = current.toLocaleString(undefined, {maximumFractionDigits: (end % 1 === 0 ? 0 : 1)});
+                if (progress < 1) window.requestAnimationFrame(step);
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        function updateHealthTips(hours) {
+            const container = document.getElementById('healthAnalysis');
+            let content = "";
+            
+            if (hours < 6) {
+                content = `
+                    <div class="bg-red-500/10 p-6 rounded-2xl border border-red-500/20">
+                        <h4 class="text-red-400 font-bold text-xl mb-3"><i class="fas fa-exclamation-triangle ml-2"></i>هشدار: شما یک "جغد شب" واقعی هستید!</h4>
+                        <p class="text-slate-300 leading-relaxed">کم‌خوابی در درازمدت می‌تواند سیستم ایمنی را ضعیف کند. پیشنهاد ویژه:</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                            <div class="bg-white/5 p-3 rounded-xl text-sm italic border-l-4 border-red-400">نور آبی موبایل را از ساعت ۱۰ شب حذف کنید.</div>
+                            <div class="bg-white/5 p-3 rounded-xl text-sm italic border-l-4 border-red-400">چای سبز را جایگزین قهوه عصرگاهی کنید.</div>
+                        </div>
+                    </div>`;
+            } else if (hours >= 6 && hours <= 9) {
+                content = `
+                    <div class="bg-emerald-500/10 p-6 rounded-2xl border border-emerald-500/20">
+                        <h4 class="text-emerald-400 font-bold text-xl mb-3"><i class="fas fa-check-circle ml-2"></i>تبریک! تعادل شما بی‌نظیر است.</h4>
+                        <p class="text-slate-300">بدن شما در وضعیت بازسازی ایده‌آل قرار دارد. برای بهتر شدن:</p>
+                        <ul class="list-disc list-inside mt-3 text-slate-400 space-y-2">
+                            <li>قبل از خواب مدیتیشن کوتاه انجام دهید.</li>
+                            <li>دمای اتاق را روی ۱۸ تا ۲۲ درجه تنظیم کنید.</li>
+                        </ul>
+                    </div>`;
+            } else {
+                content = `
+                    <div class="bg-blue-500/10 p-6 rounded-2xl border border-blue-500/20">
+                        <h4 class="text-blue-400 font-bold text-xl mb-3"><i class="fas fa-cloud-moon ml-2"></i>شما یک "استاد رویا" هستید!</h4>
+                        <p class="text-slate-300">خواب زیاد (بیش از ۹ ساعت) گاهی نشانه نیاز بدن به ریکاوری عمیق است.</p>
+                        <div class="mt-4 p-4 bg-white/5 rounded-xl text-sm text-blue-200">
+                            <strong>نکته:</strong> اگر همچنان احساس خستگی می‌کنید، آزمایش سطح ویتامین D و تیروئید پیشنهاد می‌شود.
+                        </div>
+                    </div>`;
+            }
+            container.innerHTML = content;
+        }
+
+        async function generateDreamImage() {
+            const prompt = document.getElementById('dreamPrompt').value;
+            if (!prompt) return;
+
+            const btn = document.getElementById('genBtn');
+            const loader = document.getElementById('loadingIndicator');
+            const resultDiv = document.getElementById('dreamResult');
+            const imgEl = document.getElementById('generatedImg');
+            
+            btn.classList.add('hidden');
+            loader.classList.remove('hidden');
+            resultDiv.classList.add('hidden');
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        instances: [{ prompt: `3D octane render style, dreamy and ethereal illustration of ${prompt}, vibrant colors, soft glow, high detail, masterpiece` }],
+                        parameters: { sampleCount: 1 }
+                    })
+                });
+
+                const data = await response.json();
+                if (data.predictions && data.predictions[0]) {
+                    imgEl.src = `data:image/png;base64,${data.predictions[0].bytesBase64Encoded}`;
+                    resultDiv.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error("AI Error:", error);
+            } finally {
+                btn.classList.remove('hidden');
+                loader.classList.add('hidden');
+            }
+        }
+
+        // Run on load
+        window.onload = calculate;
+    </script>
+</body>
+</html>
